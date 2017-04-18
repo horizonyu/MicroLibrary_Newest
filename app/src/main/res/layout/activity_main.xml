@@ -63,6 +63,7 @@
                     android:background="@drawable/selector_bg_edit"
                     android:textCursorDrawable="@drawable/bg_input_cursor"
                     android:paddingBottom="2dp"
+                    android:text="admin"
                     />
             </android.support.design.widget.TextInputLayout>
         </LinearLayout>
@@ -87,6 +88,7 @@
                         android:background="@drawable/selector_bg_edit"
                         android:textCursorDrawable="@drawable/bg_input_cursor"
                         android:paddingBottom="2dp"
+                        android:text="123qwe"
                         />
                 </android.support.design.widget.TextInputLayout>
             </LinearLayout>

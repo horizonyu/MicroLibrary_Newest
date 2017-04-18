@@ -15,5 +15,9 @@ public class LoginSuccessActivity extends AppCompatActivity {
         explode.setDuration(500);
         getWindow().setExitTransition(explode);
         getWindow().setEnterTransition(explode);
+
+//        getResponse();
     }
+
+
 }
