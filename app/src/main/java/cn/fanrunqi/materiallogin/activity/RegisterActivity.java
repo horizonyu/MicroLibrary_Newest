@@ -1,4 +1,4 @@
-package cn.fanrunqi.materiallogin;
+package cn.fanrunqi.materiallogin.activity;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -15,6 +15,7 @@ import android.view.animation.AccelerateInterpolator;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import cn.fanrunqi.materiallogin.R;
 
 public class RegisterActivity extends AppCompatActivity {
 

@@ -1,7 +1,8 @@
-package cn.fanrunqi.materiallogin;
+package cn.fanrunqi.materiallogin.Utils;
 
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -10,6 +11,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+
+import cn.fanrunqi.materiallogin.activity.MainActivity;
 
 /**
  * Created by horizon on 4/3/2017.
@@ -35,7 +38,9 @@ public class HttpUtils {
                     //拼接链接，在用户输入正确的用户名和密码的情况下进行授权登录
                     out.writeBytes("grant_type=password&username=" + username + "&password=" + password + "&client_id=WXClientId");
 
-
+                    //获取状态码
+//                    MainActivity.RESPONSE_CODE = connection.getResponsecode();
+                    Log.i("ResponseMessage", "run: " + connection.getResponseMessage().toString());
                     InputStream in = connection.getInputStream();
                     BufferedReader reader = new BufferedReader(new InputStreamReader(in));
                     StringBuilder builder = new StringBuilder();
@@ -44,15 +49,26 @@ public class HttpUtils {
                         builder.append(line);
                     }
 
-//                    Message msg = new Message();
-//                    msg.what = MainActivity.SHOW_RESPONSE;
+                    Message msg = new Message();
+                    msg.what = MainActivity.SHOW_RESPONSE;
                     //将服务器返回的结果放到message中
-                    String access_token = MainActivity.parseJSONWithJSONObiect(builder.toString());
-                    login(MainActivity.GET_RESPONSE_URL, access_token, mHandler);
+                    String result = MainActivity.parseJSONWithJSONObiect(builder.toString());
+                    if(result.length() < 10){
+                        //返回错误信息
+                            msg.obj = result;
+                            mHandler.sendMessage(msg);
 
-//                    msg.obj = builder.toString();
-//                    msg.obj = access_token;
-//                    handler.sendMessage(msg);
+                    }else {
+                        //返回token_type
+                        String []results = result.split(" ");
+                        MainActivity.ACCESS_TOKEN = results[0];
+                        String token_type = results[1];
+//                    login(MainActivity.GET_RESPONSE_URL, access_token, mHandler);
+//
+                            msg.obj = token_type;
+                            mHandler.sendMessage(msg);
+
+                    }
 
                 } catch (Exception e) {
                     e.printStackTrace();

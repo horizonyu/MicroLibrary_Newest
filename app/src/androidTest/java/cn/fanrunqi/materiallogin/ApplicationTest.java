@@ -9,5 +9,8 @@ import android.test.ApplicationTestCase;
 public class ApplicationTest extends ApplicationTestCase<Application> {
     public ApplicationTest() {
         super(Application.class);
+
+//        String a = "你好";
+//        Toast.makeText(getContext(), a.length(), Toast.LENGTH_SHORT).show();
     }
 }
