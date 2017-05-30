@@ -23,6 +23,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.Map;
 
 import cn.fanrunqi.materiallogin.activity.MainActivity;
 import okhttp3.Call;
@@ -264,6 +265,7 @@ public class HttpUtils {
                                         }
                                         JSONObject result = jsonObject.getJSONObject("result");
 
+
                                         String encryptedCacheKey = result.getString("encryptedCacheKey");
                                         if (!TextUtils.isEmpty(encryptedCacheKey)){
                                            Message msg = new Message();
@@ -272,7 +274,8 @@ public class HttpUtils {
                                             map.put("encryptedCacheKey", encryptedCacheKey);
                                             msg.obj = map;
                                             mHandler.sendMessage(msg);
-                                            Toast.makeText(context, "Success: " + encryptedCacheKey, Toast.LENGTH_SHORT).show();
+                                          //  Toast.makeText(context, "Success", Toast.LENGTH_SHORT).show();
+                                            MainActivity.ENCRYPTEDCACHEKEY = encryptedCacheKey;
                                         }
 
                                     } catch (JSONException e) {
@@ -290,7 +293,7 @@ public class HttpUtils {
     /**
      * 获取书籍的详细信息以及userId
      */
-    public static void okhttp_get_book_details(final Context context, final String encryptedCacheKey, final String access_token){
+    public static void okhttp_get_book_details(final Context context, final String encryptedCacheKey, final String access_token, final Handler mHandler){
         new Thread(new Runnable() {
             String url = "https://eighthundred.cn/api/Admin/Borrow/" + encryptedCacheKey;
 
@@ -322,6 +325,8 @@ public class HttpUtils {
                                         } catch (JSONException e) {
                                             e.printStackTrace();
                                         }
+
+                                        Map<String, String> map = new HashMap<String, String>();
                                         JSONObject result = jsonObject.getJSONObject("result");
                                         JSONArray userBorrowList = result.getJSONArray("userBorrowList");
                                         JSONObject borrowInfo = userBorrowList.getJSONObject(0);
@@ -336,7 +341,24 @@ public class HttpUtils {
 
                                         //获得userId
                                         String userId = result.getString("userId");
-//                                        Toast.makeText(context, "userId: " + userId, Toast.LENGTH_SHORT).show();
+
+                                        //将获取的书籍信息存放在map中
+                                        map.put("state",state + "");
+                                        map.put("bookId",bookId);
+                                        map.put("author",author);
+                                        map.put("title",title);
+                                        map.put("book_id",book_id);
+                                        map.put("price",price + "");
+                                        map.put("state",state + "");
+                                        map.put("deposit",deposit + "");
+                                        map.put("userId",userId);
+
+                                        Message msg = new Message();
+                                        msg.what = 3;
+                                        msg.obj = map;
+
+                                        mHandler.sendMessage(msg);
+
                                         Log.i("Get_Book_Details", "onResponse: " + userId);
 
                                     } catch (JSONException e) {

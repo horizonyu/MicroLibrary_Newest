@@ -41,17 +41,31 @@ private HashMap<String,String> map = new HashMap<>();
                     map = (HashMap<String, String>) msg.obj;
                     //2. 使用二维码信息（bookIds）获取加密的缓存值，并以此值作为访问路径的最后一部分，进行重定向请求，
                     //   获得借书单的详细信息以及用户id userId，通过对话框显示出来
-                    String encryptedcachekey  = map.get("encryptedcachekey");
-                    // MainActivity.ENCRYPTEDCACHEKEY = encryptedcachekey;
-                    Toast.makeText(BorrowActivity.this, encryptedcachekey, Toast.LENGTH_SHORT).show();
-                    HttpUtils.okhttp_get_book_details(getApplicationContext(), encryptedcachekey, MainActivity.ACCESS_TOKEN);
+
+                    String encryptedCacheKey  = map.get("encryptedCacheKey");
+                     MainActivity.ENCRYPTEDCACHEKEY = encryptedCacheKey;
+                    Toast.makeText(BorrowActivity.this, encryptedCacheKey, Toast.LENGTH_SHORT).show();
+                    HttpUtils.okhttp_get_book_details(getApplicationContext(),  MainActivity.ENCRYPTEDCACHEKEY, MainActivity.ACCESS_TOKEN, mHandler);
                     break;
+
+                case 3:
+                    //将书籍信息以对话框的形式表示出来
+                   map = (HashMap<String, String>) msg.obj;
+                    showBookDetails();
                 default:
                     break;
 
             }
         }
     };
+
+    /**
+     * 将用户借书信息显示出来
+     */
+    private void showBookDetails() {
+
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
