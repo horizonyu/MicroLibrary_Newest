@@ -10,7 +10,6 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -19,6 +18,9 @@ import android.widget.Toast;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -31,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
     public static final int SHOW_RESPONSE = 0;
     public static String RESPONSE_CODE;
     public static String ACCESS_TOKEN = "";
+    public static String ENCRYPTEDCACHEKEY = "";
     public static final int GET_RESPONSE = 1;
     public static final String WEB_URL = "https://eighthundred.cn/OAuth/Token";
 //    public static final String GET_RESPONSE_URL = "http://122.112.226.254/api/Test";
@@ -41,14 +44,20 @@ public class MainActivity extends AppCompatActivity {
     private static String error;
     private static String errorDescription;
     private static String response = "";
-
+    private static Map<String,String> map = new HashMap<>();
     private static Handler mHandler = new Handler(){
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
-            if(SHOW_RESPONSE == msg.what){
-                response = msg.obj.toString();
-            }
+                switch (msg.what){
+                    case 1:
+                        map = (Map<String, String>) msg.obj;
+                        break;
+                    default:
+                        break;
+                }
+
+
 
         }
     };
@@ -98,35 +107,33 @@ public class MainActivity extends AppCompatActivity {
                 }
                 break;
             case R.id.bt_go:
-//                response = "Test";
-//                Explode explode = new Explode();
-//                explode.setDuration(500);
-
-//                getWindow().setExitTransition(explode);
-//                getWindow().setEnterTransition(explode);
                 ActivityOptionsCompat oc2 = ActivityOptionsCompat.makeSceneTransitionAnimation(this);
-
-                //对用户信息进行判断，若账户信息正确，则登录成功
-                //登录
-                String username = etUsername.getText().toString();
-                String password = etPassword.getText().toString();
-                String url = WEB_URL ;
-                HttpUtils.getAuthorization(url,username,password, mHandler);
-
-
-                if (!TextUtils.isEmpty(response)){
-                    if (response.equals("bearer")){
-                        Intent i2 = new Intent(this,LoginSuccessActivity.class);
-                        startActivity(i2, oc2.toBundle());
-                    }else {
-                        Toast.makeText(MainActivity.this, "用户或密码无效", Toast.LENGTH_SHORT).show();
-                    }
-                }else {
-                    Toast.makeText(this, "无法获取响应！", Toast.LENGTH_SHORT).show();
-                }
+                handle_response_login(mHandler, oc2);
 
                 break;
         }
+    }
+
+    private void handle_response_login(Handler handler, ActivityOptionsCompat oc2) {
+
+        HttpUtils.okhttp_login(etUsername, etPassword, getApplicationContext(), handler);
+        if (map.size() > 0){
+            //实现跳转
+
+            String refresh_token = map.get("refresh_token");
+            String access_token = map.get("access_token");
+            ACCESS_TOKEN = access_token;
+
+            Intent i2 = new Intent(this,LoginSuccessActivity.class);
+            startActivity(i2, oc2.toBundle());
+            finish();
+
+            Toast.makeText(getApplicationContext(), access_token + "!", Toast.LENGTH_SHORT).show();
+        }else {
+            //没有响应结果，不实现跳转
+
+        }
+
     }
 
 

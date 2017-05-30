@@ -23,7 +23,7 @@ public class LoginSuccessActivity extends AppCompatActivity {
         getWindow().setExitTransition(explode);
         getWindow().setEnterTransition(explode);
 
-//        getResponse();
+//        okhttp_login();
 
         bt_borrow = (Button) findViewById(R.id.bt_borrow);
         bt_return = (Button) findViewById(R.id.bt_return);
@@ -31,6 +31,7 @@ public class LoginSuccessActivity extends AppCompatActivity {
         bt_borrow.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 Intent intent = new Intent(LoginSuccessActivity.this, BorrowActivity.class);
                 startActivity(intent);
             }
