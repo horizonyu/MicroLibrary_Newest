@@ -3,6 +3,18 @@
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
-
     <color name="colorPrimaryDarkTrans">#CCf57257</color>
+
+    <color name="colorWhite">#FFFFFF</color>
+
+    <color name="black">#000000</color>
+    <color name="orange">#FF5412</color>
+    <color name="white">#FFFFFF</color>
+    <color name="indigo">#3F51B5</color>
+    <color name="dark_indigo">#303F9F</color>
+
+    <color name="color1">#DFBA69</color>
+    <color name="half_black">#5d5d5d</color>
+    <color name="light_half_black">#9d9d9d</color>
+    <color name="button_bg">#4E515E</color>
 </resources>

@@ -6,6 +6,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.annotation.RequiresApi;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -90,6 +91,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // 设置按钮的点击事件
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @OnClick({R.id.bt_go, R.id.fab})
     public void onClick(View view) {
 

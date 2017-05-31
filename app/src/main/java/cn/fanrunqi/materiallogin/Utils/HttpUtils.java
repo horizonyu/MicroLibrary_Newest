@@ -377,7 +377,89 @@ public class HttpUtils {
     /**
      * 获取支付二维码
      */
-    public static void okhttp_get_payQR_image(){
+    public static void okhttp_get_payQR_image(final String userId, final String bookIds, final String access_token, final Context context){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                String url = "https://eighthundred.cn/api/Admin/Borrow?" + "userId=" + userId;
+                //https://eighthundred.cn/api/Admin/Borrow?userId=1
+                Log.e("QR_url", "QR_url: " + url);
+                OkHttpUtils.postString().url(url)
+                        .addHeader("Content-Type","application/json")
+                        .addHeader("Accept","application/json")
+                        .addHeader("Authorization","Bearer " + access_token)
+                        .mediaType(MediaType.parse("application/json; charset=utf-8"))
+                        .content("[\"" + bookIds + "\"]")
+                        .build()
+                        .execute(new StringCallback() {
+                            @Override
+                            public void onError(Call call, Exception e, int id) {
+                                Toast.makeText(context, "Failure: " + e.toString(), Toast.LENGTH_SHORT).show();
+                                Log.e("QR_Url", "onError: " + e.getMessage());
+                            }
+
+                            @Override
+                            public void onResponse(String response, int id) {
+                                if (!TextUtils.isEmpty(response)) {
+                                    try {
+                                        JSONObject jsonObject = null;
+                                        try {
+                                            jsonObject = new JSONObject(response);
+                                        } catch (JSONException e) {
+                                            e.printStackTrace();
+                                        }
+                                        JSONObject result = jsonObject.getJSONObject("result");
+
+                                        boolean isSuccess = result.getBoolean("isSuccess");
+                                        String payQRUrl = result.getString("payQRUrl");
+                                        double payTotal = result.getDouble("payTotal");
+
+//                                        tv_hello.setText("isSuccess: " + isSuccess + '\n'
+//                                                + "payQRUrl: " + payQRUrl + '\n'
+//                                                + "payTotal: " + payTotal + '\n'
+//
+//                                        );
+                                        Toast.makeText(context, "payQRUrl: " + payQRUrl, Toast.LENGTH_SHORT).show();
+
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    }
+                                    Toast.makeText(context, "Success", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        });
+            }
+        }).start();
+
+
+
+    }
+
+    public static void okhttp_show_qrImage(final Context context, final String url){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+               /* OkHttpUtils.get().url(url)
+                        .build()
+                        .execute(new BitmapCallback() {
+                            @Override
+                            public void onError(Call call, Exception e, int id) {
+
+                                Toast.makeText(context, "Failure: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                Log.e("show_qr_image", "onError: " + e.getMessage());
+
+                            }
+
+                            @Override
+                            public void onResponse(Bitmap response, int id) {
+
+                                iv_payQR.setImageBitmap(response);
+                                Toast.makeText(context, "Success", Toast.LENGTH_SHORT).show();
+
+                            }
+                        });*/
+            }
+        }).start();
 
     }
 }

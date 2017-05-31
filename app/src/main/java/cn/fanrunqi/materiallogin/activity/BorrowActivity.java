@@ -1,17 +1,23 @@
 package cn.fanrunqi.materiallogin.activity;
 
 import android.app.Activity;
+import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Vibrator;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
+
+import com.droidbyme.dialoglib.AnimUtils;
+import com.droidbyme.dialoglib.DroidDialog;
 
 import java.util.HashMap;
 
@@ -21,12 +27,16 @@ import cn.bingoogolapple.qrcode.zxing.QRCodeDecoder;
 import cn.fanrunqi.materiallogin.R;
 import cn.fanrunqi.materiallogin.Utils.HttpUtils;
 
+
 public class BorrowActivity extends AppCompatActivity implements QRCodeView.Delegate {
 
     private static final String TAG = BorrowActivity.class.getSimpleName();
     private static final int REQUEST_CODE_CHOOSE_QRCODE_FROM_GALLERY = 666;
     private static final int CHOOSE_PHOTO = 3;
+
+    private static String QR_INFO = "";
     private QRCodeView mQRCodeView;
+    private Context context;
 
 //    private Button bt_choose_qrcde_from_gallery;
 //    private Button bt_open_flashlight;
@@ -50,8 +60,9 @@ private HashMap<String,String> map = new HashMap<>();
 
                 case 3:
                     //将书籍信息以对话框的形式表示出来
+
                    map = (HashMap<String, String>) msg.obj;
-                    showBookDetails();
+                    showBookDetails(map,context);
                 default:
                     break;
 
@@ -61,8 +72,62 @@ private HashMap<String,String> map = new HashMap<>();
 
     /**
      * 将用户借书信息显示出来
+     * @param map
+     * @param context
      */
-    private void showBookDetails() {
+    private void showBookDetails(HashMap<String, String> map, final Context context) {
+        String state = map.get("state");
+        String bookId = map.get("bookId");
+        String author = map.get("author");
+        String title = map.get("title");
+        String book_id = map.get("id");
+        String price = map.get("price");
+        String deposit = map.get("deposit");
+        final String userId = map.get("userId");
+
+        String content = "state: " + state + "\n" +
+                "bookId: " + bookId + "\n" +
+                "author: " + author + "\n" +
+                "title: " + title + "\n" +
+                "book_id: " + book_id + "\n" +
+                "price: " + price + "\n" +
+                "deposit: " + deposit + "\n" +
+                "userId: " + userId + "\n";
+
+        //将书籍信息以对话框的形式表示出来
+        new DroidDialog.Builder(context)
+                .icon(R.drawable.ic_action_tick)  //添加图标
+                .title("All Well!")                //添加标题
+                .content(content )   //添加内容
+                .cancelable(true, false)                         //触摸对话框边缘可以取消对话框(boolean isCancelable, boolean isCancelableTouchOutside)
+                .positiveButton("OK", new DroidDialog.onPositiveListener(){
+
+                    @Override
+                    public void onPositive(Dialog dialog) {
+
+                        //获取并显示支付二维码
+                        Toast.makeText(context, "获取支付二维码", Toast.LENGTH_SHORT).show();
+                        HttpUtils.okhttp_get_payQR_image( userId, QR_INFO , MainActivity.ACCESS_TOKEN, context);
+
+                    }
+                })
+                .negativeButton("Cancel", new DroidDialog.onNegativeListener(){
+
+                    @Override
+                    public void onNegative(Dialog dialog) {
+                        Toast.makeText(context, "Cancel", Toast.LENGTH_SHORT).show();
+                        dialog.dismiss();
+
+                    }
+                })
+                .typeface("regular.ttf")                                        //修改字体
+                .animation(AnimUtils.AnimZoomInOut)                             //添加对话框弹出与消失的动画
+                .color(ContextCompat.getColor(context, R.color.color1),         //添加字体的颜色
+                        ContextCompat.getColor(context,R.color.indigo),
+                        ContextCompat.getColor(context,R.color.orange))
+                .divider(true, ContextCompat.getColor(context, R.color.orange)) //添加分隔线
+                .show();
+
 
     }
 
@@ -70,16 +135,11 @@ private HashMap<String,String> map = new HashMap<>();
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_borrow);
-//        setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
 
         mQRCodeView = (QRCodeView) findViewById(R.id.zxingview);
         mQRCodeView.setDelegate(this);
 
-//        bt_choose_qrcde_from_gallery = (Button) findViewById(R.id.tv_photo_picker_preview_choose);
-//        bt_open_flashlight = (Button) findViewById(R.id.open_flashlight);
-//        bt_close_flashlight = (Button) findViewById(R.id.close_flashlight);
-
-
+        context = this;
 
     }
 
@@ -107,6 +167,8 @@ private HashMap<String,String> map = new HashMap<>();
                     }else {
                         //识别二维码的信息
                         Toast.makeText(BorrowActivity.this, "二维码信息是：" + result, Toast.LENGTH_SHORT).show();
+
+                        QR_INFO = result;
 
                         //根据获取的二维码信息以及登录时获取的access_token获取借书信息，并通过对话框显示出来，确认之后调出支付二维码
                         //1. 使用access_token进行授权  MainActivity.ACCESS_TOKEN
