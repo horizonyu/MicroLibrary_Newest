@@ -445,24 +445,33 @@ public class HttpUtils {
 
     }
 
-    public static void okhttp_show_qrImage(final Context context, final String url, final ImageView iv_pay_image){
-        OkHttpUtils.get().url(url)
-                .build()
-                .execute(new BitmapCallback() {
-                    @Override
-                    public void onError(Call call, Exception e, int id) {
+    public static void okhttp_show_qrImage(final Context context, final String url, final ImageView iv_pay_image, final Handler mHandler){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                OkHttpUtils.get().url(url)
+                        .build()
+                        .execute(new BitmapCallback() {
+                            @Override
+                            public void onError(Call call, Exception e, int id) {
 
-                        Toast.makeText(context, "Failure: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                        Log.e("show_qr_image", "onError: " + e.getMessage());
+                                Toast.makeText(context, "Failure: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                Log.e("show_qr_image", "onError: " + e.getMessage());
 
-                    }
-                    @Override
-                    public void onResponse(Bitmap response, int id) {
-                        iv_pay_image.setImageBitmap(response);
-                        Toast.makeText(context, "Success", Toast.LENGTH_SHORT).show();
+                            }
+                            @Override
+                            public void onResponse(Bitmap response, int id) {
+                                Message msg = new Message();
+                                msg.what = 5;
+                                msg.obj = response;
+                                mHandler.sendMessage(msg);
+                                Toast.makeText(context, "Success", Toast.LENGTH_SHORT).show();
 
-                    }
-                });
+                            }
+                        });
+            }
+        }).run();
+
 
     }
 }

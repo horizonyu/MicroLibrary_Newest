@@ -39,33 +39,32 @@ public class BorrowActivity extends AppCompatActivity implements QRCodeView.Dele
     private Context context;
     private String payQRUrl;
 
-private HashMap<String,String> map = new HashMap<>();
-    private Handler mHandler = new Handler(){
+    private HashMap<String, String> map = new HashMap<>();
+    private Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
-            switch (msg.what){
+            switch (msg.what) {
                 case 2:
                     map = (HashMap<String, String>) msg.obj;
                     //2. 使用二维码信息（bookIds）获取加密的缓存值，并以此值作为访问路径的最后一部分，进行重定向请求，
                     //   获得借书单的详细信息以及用户id userId，通过对话框显示出来
-
-                    String encryptedCacheKey  = map.get("encryptedCacheKey");
-                     MainActivity.ENCRYPTEDCACHEKEY = encryptedCacheKey;
+                    String encryptedCacheKey = map.get("encryptedCacheKey");
+                    MainActivity.ENCRYPTEDCACHEKEY = encryptedCacheKey;
                     Toast.makeText(BorrowActivity.this, "encryptedCacheKey: " + encryptedCacheKey, Toast.LENGTH_SHORT).show();
-                    HttpUtils.okhttp_get_book_details(getApplicationContext(),  MainActivity.ENCRYPTEDCACHEKEY, MainActivity.ACCESS_TOKEN, mHandler);
+                    HttpUtils.okhttp_get_book_details(getApplicationContext(), MainActivity.ENCRYPTEDCACHEKEY, MainActivity.ACCESS_TOKEN, mHandler);
                     break;
 
                 case 3:
                     //将书籍信息以对话框的形式表示出来
-                   map = (HashMap<String, String>) msg.obj;
-                    showBookDetails(map,context);
-
+                    map = (HashMap<String, String>) msg.obj;
+                    showBookDetails(map, context);
+                    break;
                 case 4:
                     payQRUrl = (String) msg.obj;
                     Intent intent = new Intent(BorrowActivity.this, PayActivity.class);
                     intent.putExtra("payQRUrl", payQRUrl);
-                    context.startActivity(intent);
+                    startActivity(intent);
                     break;
                 default:
                     break;
@@ -76,6 +75,7 @@ private HashMap<String,String> map = new HashMap<>();
 
     /**
      * 将用户借书信息显示出来
+     *
      * @param map
      * @param context
      */
@@ -99,7 +99,7 @@ private HashMap<String,String> map = new HashMap<>();
                 "userId: " + userId + "\n";
 
         //将书籍信息以对话框的形式表示出来
-       new DroidDialog.Builder(context)
+        new DroidDialog.Builder(context)
                 .icon(R.drawable.ic_action_tick)  //添加图标
                 .title("All Well!")                //添加标题
                 .content(content)   //添加内容
@@ -120,6 +120,14 @@ private HashMap<String,String> map = new HashMap<>();
                     public void onNegative(Dialog dialog) {
                         Toast.makeText(context, "Cancel", Toast.LENGTH_SHORT).show();
                         dialog.dismiss();
+
+                    }
+                })
+                .neutralButton("GetQR", new DroidDialog.onNeutralListener() {
+
+                    @Override
+                    public void onNeutral(Dialog dialog) {
+
 
                     }
                 })
@@ -151,7 +159,7 @@ private HashMap<String,String> map = new HashMap<>();
         super.onActivityResult(requestCode, resultCode, data);
         mQRCodeView.showScanRect();
 
-        if (resultCode == Activity.RESULT_OK && requestCode == REQUEST_CODE_CHOOSE_QRCODE_FROM_GALLERY){
+        if (resultCode == Activity.RESULT_OK && requestCode == REQUEST_CODE_CHOOSE_QRCODE_FROM_GALLERY) {
             final String imagePath = BGAPhotoPickerActivity.getSelectedImages(data).get(0);
 
             AsyncTask<Void, Void, String> asyncTask = new AsyncTask<Void, Void, String>() {
@@ -164,10 +172,10 @@ private HashMap<String,String> map = new HashMap<>();
                 @Override
                 protected void onPostExecute(String result) {
                     super.onPostExecute(result);
-                    if (TextUtils.isEmpty(result)){
+                    if (TextUtils.isEmpty(result)) {
                         Toast.makeText(BorrowActivity.this, "未发现二维码", Toast.LENGTH_SHORT).show();
 
-                    }else {
+                    } else {
                         //识别二维码的信息
                         Toast.makeText(BorrowActivity.this, "二维码信息是：" + result, Toast.LENGTH_SHORT).show();
 
@@ -208,7 +216,7 @@ private HashMap<String,String> map = new HashMap<>();
         super.onDestroy();
     }
 
-    public void vibrate(){
+    public void vibrate() {
         Vibrator vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
         vibrator.vibrate(200);
     }
@@ -221,7 +229,7 @@ private HashMap<String,String> map = new HashMap<>();
 
         vibrate();
         mQRCodeView.startSpot();
-        
+
     }
 
     @Override
@@ -230,8 +238,8 @@ private HashMap<String,String> map = new HashMap<>();
 
     }
 
-    public void OnClick(View v){
-        switch (v.getId()){
+    public void OnClick(View v) {
+        switch (v.getId()) {
             case R.id.open_flashlight:
                 mQRCodeView.openFlashlight();
                 break;
@@ -249,7 +257,6 @@ private HashMap<String,String> map = new HashMap<>();
                 break;
         }
     }
-
 
 
 }
