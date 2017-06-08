@@ -37,10 +37,8 @@ public class BorrowActivity extends AppCompatActivity implements QRCodeView.Dele
     private static String QR_INFO = "";
     private QRCodeView mQRCodeView;
     private Context context;
+    private String payQRUrl;
 
-//    private Button bt_choose_qrcde_from_gallery;
-//    private Button bt_open_flashlight;
-//    private Button bt_close_flashlight;
 private HashMap<String,String> map = new HashMap<>();
     private Handler mHandler = new Handler(){
         @Override
@@ -54,15 +52,21 @@ private HashMap<String,String> map = new HashMap<>();
 
                     String encryptedCacheKey  = map.get("encryptedCacheKey");
                      MainActivity.ENCRYPTEDCACHEKEY = encryptedCacheKey;
-                    Toast.makeText(BorrowActivity.this, encryptedCacheKey, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(BorrowActivity.this, "encryptedCacheKey: " + encryptedCacheKey, Toast.LENGTH_SHORT).show();
                     HttpUtils.okhttp_get_book_details(getApplicationContext(),  MainActivity.ENCRYPTEDCACHEKEY, MainActivity.ACCESS_TOKEN, mHandler);
                     break;
 
                 case 3:
                     //将书籍信息以对话框的形式表示出来
-
                    map = (HashMap<String, String>) msg.obj;
                     showBookDetails(map,context);
+
+                case 4:
+                    payQRUrl = (String) msg.obj;
+                    Intent intent = new Intent(BorrowActivity.this, PayActivity.class);
+                    intent.putExtra("payQRUrl", payQRUrl);
+                    context.startActivity(intent);
+                    break;
                 default:
                     break;
 
@@ -95,23 +99,22 @@ private HashMap<String,String> map = new HashMap<>();
                 "userId: " + userId + "\n";
 
         //将书籍信息以对话框的形式表示出来
-        new DroidDialog.Builder(context)
+       new DroidDialog.Builder(context)
                 .icon(R.drawable.ic_action_tick)  //添加图标
                 .title("All Well!")                //添加标题
-                .content(content )   //添加内容
+                .content(content)   //添加内容
                 .cancelable(true, false)                         //触摸对话框边缘可以取消对话框(boolean isCancelable, boolean isCancelableTouchOutside)
-                .positiveButton("OK", new DroidDialog.onPositiveListener(){
+                .positiveButton("Borrow", new DroidDialog.onPositiveListener() {
 
                     @Override
                     public void onPositive(Dialog dialog) {
-
                         //获取并显示支付二维码
                         Toast.makeText(context, "获取支付二维码", Toast.LENGTH_SHORT).show();
-                        HttpUtils.okhttp_get_payQR_image( userId, QR_INFO , MainActivity.ACCESS_TOKEN, context);
+                        HttpUtils.okhttp_get_payQRUrl(userId, QR_INFO, MainActivity.ACCESS_TOKEN, context, mHandler);
 
                     }
                 })
-                .negativeButton("Cancel", new DroidDialog.onNegativeListener(){
+                .negativeButton("Cancel", new DroidDialog.onNegativeListener() {
 
                     @Override
                     public void onNegative(Dialog dialog) {
@@ -123,8 +126,8 @@ private HashMap<String,String> map = new HashMap<>();
                 .typeface("regular.ttf")                                        //修改字体
                 .animation(AnimUtils.AnimZoomInOut)                             //添加对话框弹出与消失的动画
                 .color(ContextCompat.getColor(context, R.color.color1),         //添加字体的颜色
-                        ContextCompat.getColor(context,R.color.indigo),
-                        ContextCompat.getColor(context,R.color.orange))
+                        ContextCompat.getColor(context, R.color.indigo),
+                        ContextCompat.getColor(context, R.color.orange))
                 .divider(true, ContextCompat.getColor(context, R.color.orange)) //添加分隔线
                 .show();
 

@@ -1,14 +1,17 @@
 package cn.fanrunqi.materiallogin.Utils;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.os.Handler;
 import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.zhy.http.okhttp.OkHttpUtils;
+import com.zhy.http.okhttp.callback.BitmapCallback;
 import com.zhy.http.okhttp.callback.StringCallback;
 
 import org.json.JSONArray;
@@ -377,7 +380,8 @@ public class HttpUtils {
     /**
      * 获取支付二维码
      */
-    public static void okhttp_get_payQR_image(final String userId, final String bookIds, final String access_token, final Context context){
+    public static void okhttp_get_payQRUrl(final String userId, final String bookIds,
+                                           final String access_token, final Context context, final Handler mHandler){
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -420,6 +424,12 @@ public class HttpUtils {
 //
 //                                        );
                                         Toast.makeText(context, "payQRUrl: " + payQRUrl, Toast.LENGTH_SHORT).show();
+                                        Message msg = new Message();
+                                        msg.what = 4;
+                                        msg.obj = payQRUrl;
+
+                                        mHandler.sendMessage(msg);
+
 
                                     } catch (JSONException e) {
                                         e.printStackTrace();
@@ -435,31 +445,24 @@ public class HttpUtils {
 
     }
 
-    public static void okhttp_show_qrImage(final Context context, final String url){
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-               /* OkHttpUtils.get().url(url)
-                        .build()
-                        .execute(new BitmapCallback() {
-                            @Override
-                            public void onError(Call call, Exception e, int id) {
+    public static void okhttp_show_qrImage(final Context context, final String url, final ImageView iv_pay_image){
+        OkHttpUtils.get().url(url)
+                .build()
+                .execute(new BitmapCallback() {
+                    @Override
+                    public void onError(Call call, Exception e, int id) {
 
-                                Toast.makeText(context, "Failure: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                                Log.e("show_qr_image", "onError: " + e.getMessage());
+                        Toast.makeText(context, "Failure: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        Log.e("show_qr_image", "onError: " + e.getMessage());
 
-                            }
+                    }
+                    @Override
+                    public void onResponse(Bitmap response, int id) {
+                        iv_pay_image.setImageBitmap(response);
+                        Toast.makeText(context, "Success", Toast.LENGTH_SHORT).show();
 
-                            @Override
-                            public void onResponse(Bitmap response, int id) {
-
-                                iv_payQR.setImageBitmap(response);
-                                Toast.makeText(context, "Success", Toast.LENGTH_SHORT).show();
-
-                            }
-                        });*/
-            }
-        }).start();
+                    }
+                });
 
     }
 }
