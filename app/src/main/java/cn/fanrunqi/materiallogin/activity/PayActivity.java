@@ -20,6 +20,7 @@ public class PayActivity extends AppCompatActivity {
     private Button bt_put_info;
     private Context context;
     private ProgressBar pb;
+    private String userId = "";
     private Handler mHandler = new Handler(){
         @Override
         public void handleMessage(Message msg) {
@@ -30,6 +31,7 @@ public class PayActivity extends AppCompatActivity {
                     if (response != null){
                         pb.setVisibility(View.GONE);
                         iv_pay_image.setImageBitmap(response);
+
 
                     }
                     break;
@@ -47,12 +49,22 @@ public class PayActivity extends AppCompatActivity {
         initialUI();
         showPyQR();
 
+        bt_put_info.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //TODO 将借书信息以及用户id存入数据库中
+                HttpUtils.okhttp_put_borrow_info(context, BorrowActivity.QR_INFO, MainActivity.ACCESS_TOKEN, userId);
+            }
+        });
+
     }
 
     private void showPyQR() {
+        //获取由BorrowActivity传入的值
         Intent intent = getIntent();
         Bundle bundle = intent.getExtras();
         String payQRUrl = bundle.getString("payQRUrl");
+        userId = bundle.getString("userId");
         HttpUtils.okhttp_show_qrImage(context, payQRUrl, iv_pay_image, mHandler);
     }
 

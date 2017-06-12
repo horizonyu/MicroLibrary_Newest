@@ -34,11 +34,11 @@ public class BorrowActivity extends AppCompatActivity implements QRCodeView.Dele
     private static final int REQUEST_CODE_CHOOSE_QRCODE_FROM_GALLERY = 666;
     private static final int CHOOSE_PHOTO = 3;
 
-    private static String QR_INFO = "";
+    public static String QR_INFO = "";
     private QRCodeView mQRCodeView;
     private Context context;
     private String payQRUrl;
-
+    private String userId;
     private HashMap<String, String> map = new HashMap<>();
     private Handler mHandler = new Handler() {
         @Override
@@ -64,6 +64,8 @@ public class BorrowActivity extends AppCompatActivity implements QRCodeView.Dele
                     payQRUrl = (String) msg.obj;
                     Intent intent = new Intent(BorrowActivity.this, PayActivity.class);
                     intent.putExtra("payQRUrl", payQRUrl);
+                    //读者id
+                    intent.putExtra("userId", userId);
                     startActivity(intent);
                     break;
                 default:
@@ -87,7 +89,8 @@ public class BorrowActivity extends AppCompatActivity implements QRCodeView.Dele
         String book_id = map.get("id");
         String price = map.get("price");
         String deposit = map.get("deposit");
-        final String userId = map.get("userId");
+
+        userId = map.get("userId");
 
         String content = "state: " + state + "\n" +
                 "bookId: " + bookId + "\n" +
@@ -111,6 +114,7 @@ public class BorrowActivity extends AppCompatActivity implements QRCodeView.Dele
                         //获取并显示支付二维码
                         Toast.makeText(context, "获取支付二维码", Toast.LENGTH_SHORT).show();
                         HttpUtils.okhttp_get_payQRUrl(userId, QR_INFO, MainActivity.ACCESS_TOKEN, context, mHandler);
+                        dialog.dismiss();
 
                     }
                 })

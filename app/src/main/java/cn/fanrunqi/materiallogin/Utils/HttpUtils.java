@@ -31,6 +31,7 @@ import java.util.Map;
 import cn.fanrunqi.materiallogin.activity.MainActivity;
 import okhttp3.Call;
 import okhttp3.MediaType;
+import okhttp3.RequestBody;
 
 /**
  * Created by horizon on 4/3/2017.
@@ -474,4 +475,45 @@ public class HttpUtils {
 
 
     }
+
+    /**
+     * 将读者的借书信息保存0
+     * @param context
+     * @param bookIds 读者借阅书籍id
+     * @param access_token 授权口令
+     * @param userId 读者口令
+     */
+    public static void okhttp_put_borrow_info(final Context context, final String bookIds, final String access_token, String userId){
+        final String url = "https://eighthundred.cn/api/Admin/Borrow?userId=" + userId;
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                OkHttpUtils.put().url(url)
+                        .addHeader("Content-Type", "application/json")
+                        .addHeader("Accept", "application/json")
+                        .addHeader("Authorization", "Bearer " + access_token)
+                        .requestBody(RequestBody.create(null, "[\"" + bookIds + "\"]"))
+                        .build()
+                        .execute(new StringCallback() {
+                            @Override
+                            public void onError(Call call, Exception e, int id) {
+                                Log.i("PutBorrowInfo", "onError: " + e.getMessage());
+                                Toast.makeText(context, "借书信息保存失败", Toast.LENGTH_SHORT).show();
+                            }
+
+                            @Override
+                            public void onResponse(String response, int id) {
+                                if (response.equals("")){
+                                    Log.i("PutBorrowInfo", "onResponse: " + "借书信息保存成功");
+                                    Toast.makeText(context, "借书信息保存成功", Toast.LENGTH_SHORT).show();
+                                }else {
+                                    Log.i("PutBorrowInfo", "onResponse: " + response);
+                                    Toast.makeText(context, response, Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        });
+            }
+        }).start();
+    }
+
 }
