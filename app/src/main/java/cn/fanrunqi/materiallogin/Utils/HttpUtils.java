@@ -312,9 +312,7 @@ public class HttpUtils {
                             @Override
                             public void onError(Call call, Exception e, int id) {
                                 Log.e("UserId", "onError: " + e.toString());
-
-//                                Toast.makeText(context, "Failure: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-
+                                Toast.makeText(context, "错误信息" + e.getMessage(), Toast.LENGTH_SHORT).show();
 
                             }
 
@@ -333,17 +331,23 @@ public class HttpUtils {
                                         Map<String, String> map = new HashMap<String, String>();
                                         JSONObject result = jsonObject.getJSONObject("result");
                                         JSONArray userBorrowList = result.getJSONArray("userBorrowList");
+
+                                        //TODO 由于读者会一次性借阅多本书，所有需要处理多本书的详细信息，
+                                        //TODO 需要使用BookDetailInfo 类，来保存每本书的详细信息，将BookDetailInfo
+                                        //TODO 对象保存在list中。
+
                                         JSONObject borrowInfo = userBorrowList.getJSONObject(0);
                                         int state = borrowInfo.getInt("state");
-                                        String bookId = borrowInfo.getString("bookId");
+                                        //需要
+                                        String bookId = borrowInfo.getString("id");
                                         String author = borrowInfo.getString("author");
                                         String title = borrowInfo.getString("title");
-                                        String book_id = borrowInfo.getString("id");
+//                                        String book_id = borrowInfo.getString("id");
                                         double price = borrowInfo.getDouble("price");
                                         int deposit = borrowInfo.getInt("deposit");
                                         // String refresh_token = result.getString("refresh_token");
 
-                                        //获得userId
+                                        //获得userId，需要
                                         String userId = result.getString("userId");
 
                                         //将获取的书籍信息存放在map中
@@ -351,7 +355,7 @@ public class HttpUtils {
                                         map.put("bookId",bookId);
                                         map.put("author",author);
                                         map.put("title",title);
-                                        map.put("book_id",book_id);
+//                                        map.put("book_id",book_id);
                                         map.put("price",price + "");
                                         map.put("state",state + "");
                                         map.put("deposit",deposit + "");
@@ -486,29 +490,104 @@ public class HttpUtils {
     public static void okhttp_put_borrow_info(final Context context, final String bookIds, final String access_token, String userId){
         final String url = "https://eighthundred.cn/api/Admin/Borrow?userId=" + userId;
         new Thread(new Runnable() {
+            MediaType MEDIA_TYPE_PLAIN = MediaType.parse("application/json;charset=utf-8");
             @Override
             public void run() {
                 OkHttpUtils.put().url(url)
-                        .addHeader("Content-Type", "application/json")
+//                        .addHeader("Content-Type", "application/json")
                         .addHeader("Accept", "application/json")
                         .addHeader("Authorization", "Bearer " + access_token)
-                        .requestBody(RequestBody.create(null, "[\"" + bookIds + "\"]"))
+                        .requestBody(RequestBody.create(MEDIA_TYPE_PLAIN, "[\"" + bookIds + "\"]"))
+                        .build()
+                        .execute(new StringCallback() {
+                    @Override
+                    public void onError(Call call, Exception e, int id) {
+                        Toast.makeText(context, "错误信息：" + e.getMessage(), Toast.LENGTH_SHORT).show();
+
+                    }
+
+                    @Override
+                    public void onResponse(String response, int id) {
+                            if (TextUtils.isEmpty(response)){
+                                Toast.makeText(context, "借书成功！", Toast.LENGTH_SHORT).show();
+
+
+                            }
+                    }
+                });
+            }
+        }).start();
+
+
+    }
+
+
+    //还书
+    public static void okhttp_get_borrow_info(final Context context, final String encryptedCacheKey, final String access_token, final Handler mHandler){
+        new Thread(new Runnable() {
+            String url = "https://eighthundred.cn/api/Admin/Return/" + encryptedCacheKey;
+
+            @Override
+            public void run() {
+                Log.i("url", "url: " + url);
+                OkHttpUtils.get().url(url)
+                        .addHeader("Accept","application/json")
+                        .addHeader("Authorization","Bearer " + access_token)
                         .build()
                         .execute(new StringCallback() {
                             @Override
                             public void onError(Call call, Exception e, int id) {
-                                Log.i("PutBorrowInfo", "onError: " + e.getMessage());
-                                Toast.makeText(context, "借书信息保存失败", Toast.LENGTH_SHORT).show();
+                                Log.e("UserId", "onError: " + e.toString());
+
                             }
 
                             @Override
                             public void onResponse(String response, int id) {
-                                if (response.equals("")){
-                                    Log.i("PutBorrowInfo", "onResponse: " + "借书信息保存成功");
-                                    Toast.makeText(context, "借书信息保存成功", Toast.LENGTH_SHORT).show();
-                                }else {
-                                    Log.i("PutBorrowInfo", "onResponse: " + response);
-                                    Toast.makeText(context, response, Toast.LENGTH_SHORT).show();
+
+                                if (!TextUtils.isEmpty(response)) {
+                                    try {
+                                        JSONObject jsonObject = null;
+                                        try {
+                                            jsonObject = new JSONObject(response);
+                                        } catch (JSONException e) {
+                                            e.printStackTrace();
+                                        }
+
+                                        Map<String, String> map = new HashMap<String, String>();
+                                        JSONObject result = jsonObject.getJSONObject("result");
+                                        JSONArray bookReturnList = result.getJSONArray("bookReturnList");
+
+                                        //书籍详细信息
+                                        JSONObject bookDetail = bookReturnList.getJSONObject(0);
+                                        String bookTitle = bookDetail.getString("bookTitle");
+                                        String bookBriefId = bookDetail.getString("bookBriefId");
+                                        String bookId = bookDetail.getString("bookId");
+                                        String deposit = bookDetail.getString("deposit");
+                                        String borrowTime = bookDetail.getString("borrowTime");
+
+                                        //读者信息
+                                        JSONObject userInfo = result.getJSONObject("userInfo");
+                                        String userId = userInfo.getString("id");
+                                        String nickName = userInfo.getString("nickName");
+
+                                        map.put("bookTitle", bookTitle);
+                                        map.put("bookBriefId", bookBriefId);
+                                        map.put("bookId", bookId);
+                                        map.put("deposit", deposit);
+                                        map.put("borrowTime", borrowTime);
+                                        map.put("userId", userId);
+                                        map.put("nickName", nickName);
+
+                                        Message msg = new Message();
+                                        msg.what = 0;
+                                        msg.obj = map;
+                                        mHandler.sendMessage(msg);
+
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    }
+                                    Toast.makeText(context, "Success", Toast.LENGTH_SHORT).show();
+                                    Log.i("Get_Book_Details", "Success");
                                 }
                             }
                         });
@@ -516,4 +595,54 @@ public class HttpUtils {
         }).start();
     }
 
+    public static void okhttp_put_return_info(final Context context, final String bookIds, final String access_token, final String userId){
+        new Thread(){
+            @Override
+            public void run() {
+                super.run();
+                MediaType MEDIA_TYPE_PLAIN = MediaType.parse("application/json;charset=utf-8");
+                String url = "https://eighthundred.cn/api/Admin/Return?uId=" + userId;
+                OkHttpUtils.put().url(url)
+//                        .addHeader("Content-Type","application/json")
+                        .addHeader("Accept", "application/json")
+                        .addHeader("Authorization","Bearer " + access_token)
+                        .requestBody(RequestBody.create(MEDIA_TYPE_PLAIN, "[\"" + bookIds + "\"]"))
+                        .build()
+                        .execute(new StringCallback() {
+                            @Override
+                            public void onError(Call call, Exception e, int id) {
+                                Log.i("okhttp_put_return_info", "onError: " + e.getMessage());
+                                Toast.makeText(context, "错误信息：" + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            }
+
+                            @Override
+                            public void onResponse(String response, int id) {
+                                Log.i("okhttp_put_return_info", "onResponse: " + response);
+                                Toast.makeText(context, "response: " + response, Toast.LENGTH_SHORT).show();
+                                JSONObject jsonObject = null;
+                                try {
+
+                                    jsonObject = new JSONObject(response);
+                                    JSONObject result = jsonObject.getJSONObject("result");
+                                    boolean isSuccess = result.getBoolean("isSuccess");
+                                    if (isSuccess){
+                                        Toast.makeText(context, "还书成功！", Toast.LENGTH_SHORT).show();
+
+                                    }else {
+                                        Toast.makeText(context, "还书失败！" + isSuccess, Toast.LENGTH_SHORT).show();
+                                    }
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+
+
+
+
+                            }
+                        });
+
+            }
+        }.start();
+
+    }
 }

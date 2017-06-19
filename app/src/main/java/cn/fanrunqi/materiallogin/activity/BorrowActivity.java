@@ -35,6 +35,8 @@ public class BorrowActivity extends AppCompatActivity implements QRCodeView.Dele
     private static final int CHOOSE_PHOTO = 3;
 
     public static String QR_INFO = "";
+    public static String BOOK_ID = "";
+
     private QRCodeView mQRCodeView;
     private Context context;
     private String payQRUrl;
@@ -67,6 +69,8 @@ public class BorrowActivity extends AppCompatActivity implements QRCodeView.Dele
                     //读者id
                     intent.putExtra("userId", userId);
                     startActivity(intent);
+
+                    BorrowActivity.this.finish();
                     break;
                 default:
                     break;
@@ -83,20 +87,23 @@ public class BorrowActivity extends AppCompatActivity implements QRCodeView.Dele
      */
     private void showBookDetails(HashMap<String, String> map, final Context context) {
         String state = map.get("state");
+        //需要
         String bookId = map.get("bookId");
         String author = map.get("author");
         String title = map.get("title");
-        String book_id = map.get("id");
+//        String book_id = map.get("id");
         String price = map.get("price");
         String deposit = map.get("deposit");
-
+        //需要
         userId = map.get("userId");
+
+        BOOK_ID = bookId;
 
         String content = "state: " + state + "\n" +
                 "bookId: " + bookId + "\n" +
                 "author: " + author + "\n" +
                 "title: " + title + "\n" +
-                "book_id: " + book_id + "\n" +
+//                "book_id: " + book_id + "\n" +
                 "price: " + price + "\n" +
                 "deposit: " + deposit + "\n" +
                 "userId: " + userId + "\n";
@@ -114,7 +121,6 @@ public class BorrowActivity extends AppCompatActivity implements QRCodeView.Dele
                         //获取并显示支付二维码
                         Toast.makeText(context, "获取支付二维码", Toast.LENGTH_SHORT).show();
                         HttpUtils.okhttp_get_payQRUrl(userId, QR_INFO, MainActivity.ACCESS_TOKEN, context, mHandler);
-                        dialog.dismiss();
 
                     }
                 })
@@ -158,6 +164,12 @@ public class BorrowActivity extends AppCompatActivity implements QRCodeView.Dele
 
     }
 
+    /**
+     * 此处是从本地相册打开二维码进行识别，
+     * @param requestCode
+     * @param resultCode
+     * @param data
+     */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -181,14 +193,19 @@ public class BorrowActivity extends AppCompatActivity implements QRCodeView.Dele
 
                     } else {
                         //识别二维码的信息
-                        Toast.makeText(BorrowActivity.this, "二维码信息是：" + result, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(BorrowActivity.this, "图片二维码信息是：" + result, Toast.LENGTH_SHORT).show();
 
                         QR_INFO = result;
-
+//                        encryptedCacheKey
+//                        ENCRYPTED_CACHEKEY
                         //根据获取的二维码信息以及登录时获取的access_token获取借书信息，并通过对话框显示出来，确认之后调出支付二维码
                         //1. 使用access_token进行授权  MainActivity.ACCESS_TOKEN
-                        HttpUtils.okhttp_authorization(getApplicationContext(), MainActivity.ACCESS_TOKEN, result, mHandler);
+//                        HttpUtils.okhttp_authorization(getApplicationContext(), MainActivity.ACCESS_TOKEN, result, mHandler);
 
+                        //根据获取到的二维码信息（encryptedCacheKey），以及access_token，获取书籍的详细信息
+                        HttpUtils.okhttp_get_book_details(context, result, MainActivity.ACCESS_TOKEN, mHandler);
+
+                        Log.i(TAG, "onPostExecute: okhttp_get_book_details");
                         //3. 使用识别二维码获得的bookIds以及用户id userId 获得支付二维码链接，并将图片显示出来供借书者进行付款
                     }
                 }
@@ -206,6 +223,8 @@ public class BorrowActivity extends AppCompatActivity implements QRCodeView.Dele
         mQRCodeView.showScanRect();
 
         mQRCodeView.startSpot();
+
+        Log.i(TAG, "onStart: ");
     }
 
     @Override
@@ -227,12 +246,21 @@ public class BorrowActivity extends AppCompatActivity implements QRCodeView.Dele
 
     @Override
     public void onScanQRCodeSuccess(String result) {
+
+        QR_INFO = result;
         //成功扫描二维码/条形码
-        Log.i(TAG, "result : " + result);
-        Toast.makeText(this, result, Toast.LENGTH_SHORT).show();
+        Log.i(TAG, "扫描结果： " + result);
+        Toast.makeText(this, "扫描结果：" + result, Toast.LENGTH_SHORT).show();
+        Log.i(TAG, "onScanQRCodeSuccess: " + result);
 
         vibrate();
         mQRCodeView.startSpot();
+
+        HttpUtils.okhttp_get_book_details(context, result, MainActivity.ACCESS_TOKEN, mHandler);
+
+
+
+
 
     }
 
@@ -256,6 +284,7 @@ public class BorrowActivity extends AppCompatActivity implements QRCodeView.Dele
 //                startActivityForResult(intent, CHOOSE_PHOTO);
 
                 startActivityForResult(BGAPhotoPickerActivity.newIntent(this, null, 1, null, false), REQUEST_CODE_CHOOSE_QRCODE_FROM_GALLERY);
+                Log.i(TAG, "OnClick: startActivityForResult");
                 break;
             default:
                 break;

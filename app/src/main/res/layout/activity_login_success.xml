@@ -8,19 +8,31 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     android:gravity="center"
-    tools:context="cn.fanrunqi.materiallogin.activity.LoginSuccessActivity">
+    tools:context="cn.fanrunqi.materiallogin.activity.LoginSuccessActivity"
+    android:background="@drawable/bg">
+
 
 
     <Button
         android:id="@+id/bt_borrow"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:onClick="btOnClick"
         android:text="Borrow"/>
 
     <Button
         android:id="@+id/bt_return"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/bt_borrow"
+        android:onClick="btOnClick"
         android:text="Return"/>
+
+    <Button
+        android:id="@+id/bt_exit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/bt_return"
+        android:onClick="btOnClick"
+        android:text="EXIT"/>
 </RelativeLayout>

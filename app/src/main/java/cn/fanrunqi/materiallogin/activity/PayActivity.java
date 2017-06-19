@@ -10,7 +10,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 
 import cn.fanrunqi.materiallogin.R;
 import cn.fanrunqi.materiallogin.Utils.HttpUtils;
@@ -19,7 +18,7 @@ public class PayActivity extends AppCompatActivity {
     private ImageView iv_pay_image;
     private Button bt_put_info;
     private Context context;
-    private ProgressBar pb;
+//    private ProgressBar pb;
     private String userId = "";
     private Handler mHandler = new Handler(){
         @Override
@@ -29,7 +28,7 @@ public class PayActivity extends AppCompatActivity {
                 case 5:
                     Bitmap response = (Bitmap) msg.obj;
                     if (response != null){
-                        pb.setVisibility(View.GONE);
+//                        pb.setVisibility(View.GONE);
                         iv_pay_image.setImageBitmap(response);
 
 
@@ -53,7 +52,9 @@ public class PayActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 //TODO 将借书信息以及用户id存入数据库中
-                HttpUtils.okhttp_put_borrow_info(context, BorrowActivity.QR_INFO, MainActivity.ACCESS_TOKEN, userId);
+                HttpUtils.okhttp_put_borrow_info(context, BorrowActivity.BOOK_ID, MainActivity.ACCESS_TOKEN, userId);
+                PayActivity.this.finish();
+
             }
         });
 
@@ -71,6 +72,6 @@ public class PayActivity extends AppCompatActivity {
     private void initialUI() {
         iv_pay_image = (ImageView) findViewById(R.id.iv_pay_image);
         bt_put_info = (Button) findViewById(R.id.bt_put_info);
-        pb = (ProgressBar) findViewById(R.id.pb_wait);
+//        pb = (ProgressBar) findViewById(R.id.pb_wait);
     }
 }
