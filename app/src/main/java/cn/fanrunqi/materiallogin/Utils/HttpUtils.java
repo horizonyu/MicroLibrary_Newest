@@ -25,10 +25,13 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import cn.fanrunqi.materiallogin.activity.MainActivity;
+import cn.fanrunqi.materiallogin.bean.BookDetailInfo;
 import okhttp3.Call;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
@@ -175,6 +178,8 @@ public class HttpUtils {
             public void run() {
                 if (username.equals("admin") && password.equals("123qwe")){
                     OkHttpUtils.post().url(url)
+                            .addHeader("Content-Type", "application/x-www-form-urlencoded")
+                            .addHeader("Accept", "application/json")
                             .addParams("username", username)
                             .addParams("password", password)
                             .addParams("grant_type", "password")
@@ -209,7 +214,6 @@ public class HttpUtils {
                                             map.put("access_token", access_token);
                                             map.put("refresh_token", refresh_token);
 
-
                                             Message msg = new Message();
                                             msg.what = 1;
                                             msg.obj = map;
@@ -231,8 +235,6 @@ public class HttpUtils {
                 }
             }
         }).start();
-
-
 
     }
 
@@ -328,7 +330,8 @@ public class HttpUtils {
                                             e.printStackTrace();
                                         }
 
-                                        Map<String, String> map = new HashMap<String, String>();
+                                        List<BookDetailInfo> bookList = new ArrayList<BookDetailInfo>();
+//                                        Map<String, String> map = new HashMap<String, String>();
                                         JSONObject result = jsonObject.getJSONObject("result");
                                         JSONArray userBorrowList = result.getJSONArray("userBorrowList");
 
@@ -336,38 +339,50 @@ public class HttpUtils {
                                         //TODO 需要使用BookDetailInfo 类，来保存每本书的详细信息，将BookDetailInfo
                                         //TODO 对象保存在list中。
 
-                                        JSONObject borrowInfo = userBorrowList.getJSONObject(0);
-                                        int state = borrowInfo.getInt("state");
-                                        //需要
-                                        String bookId = borrowInfo.getString("id");
-                                        String author = borrowInfo.getString("author");
-                                        String title = borrowInfo.getString("title");
-//                                        String book_id = borrowInfo.getString("id");
-                                        double price = borrowInfo.getDouble("price");
-                                        int deposit = borrowInfo.getInt("deposit");
-                                        // String refresh_token = result.getString("refresh_token");
+                                        for (int i = 0;i < userBorrowList.length();i++){
+                                            JSONObject borrowInfo = userBorrowList.getJSONObject(i);
+                                            int state = borrowInfo.getInt("state");
+                                            //需要
+                                            //书籍id
+                                            String bookId = borrowInfo.getString("id");
+                                            String author = borrowInfo.getString("author");
+                                            String title = borrowInfo.getString("title");
+                                            double price = borrowInfo.getDouble("price");
+                                            int deposit = borrowInfo.getInt("deposit");
+                                            // String refresh_token = result.getString("refresh_token");
 
-                                        //获得userId，需要
-                                        String userId = result.getString("userId");
+                                            //获得userId，需要
+                                            String userId = result.getString("userId");
 
-                                        //将获取的书籍信息存放在map中
-                                        map.put("state",state + "");
-                                        map.put("bookId",bookId);
-                                        map.put("author",author);
-                                        map.put("title",title);
-//                                        map.put("book_id",book_id);
-                                        map.put("price",price + "");
-                                        map.put("state",state + "");
-                                        map.put("deposit",deposit + "");
-                                        map.put("userId",userId);
+                                            BookDetailInfo bookDetailInfo = new BookDetailInfo();
+                                            bookDetailInfo.setId(bookId);
+                                            bookDetailInfo.setAuthor(author);
+                                            bookDetailInfo.setTitle(title);
+                                            bookDetailInfo.setPrice(price);
+                                            bookDetailInfo.setDeposit(deposit);
+                                            bookDetailInfo.setUserId(userId);
+                                            bookDetailInfo.setState(state);
+//                                            //将获取的书籍信息存放在map中
+//                                            map.put("state",state + "");
+//                                            map.put("bookId",bookId);
+//                                            map.put("author",author);
+//                                            map.put("title",title);
+////                                        map.put("book_id",book_id);
+//                                            map.put("price",price + "");
+//                                            map.put("state",state + "");
+//                                            map.put("deposit",deposit + "");
+//                                            map.put("userId",userId);
+                                            bookList.add(bookDetailInfo);
+                                            Log.i("Get_Book_Details", "onResponse: " + userId);
+                                            Toast.makeText(context, "书的数量： " + bookList.size(), Toast.LENGTH_SHORT).show();
+
+                                        }
 
                                         Message msg = new Message();
                                         msg.what = 3;
-                                        msg.obj = map;
-
+//                                        msg.obj = map;
+                                        msg.obj = bookList;
                                         mHandler.sendMessage(msg);
-
-                                        Log.i("Get_Book_Details", "onResponse: " + userId);
 
                                     } catch (JSONException e) {
                                         e.printStackTrace();

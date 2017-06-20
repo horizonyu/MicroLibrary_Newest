@@ -19,13 +19,16 @@ import android.widget.Toast;
 import com.droidbyme.dialoglib.AnimUtils;
 import com.droidbyme.dialoglib.DroidDialog;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import cn.bingoogolapple.photopicker.activity.BGAPhotoPickerActivity;
 import cn.bingoogolapple.qrcode.core.QRCodeView;
 import cn.bingoogolapple.qrcode.zxing.QRCodeDecoder;
 import cn.fanrunqi.materiallogin.R;
 import cn.fanrunqi.materiallogin.Utils.HttpUtils;
+import cn.fanrunqi.materiallogin.bean.BookDetailInfo;
 
 
 public class BorrowActivity extends AppCompatActivity implements QRCodeView.Delegate {
@@ -42,6 +45,7 @@ public class BorrowActivity extends AppCompatActivity implements QRCodeView.Dele
     private String payQRUrl;
     private String userId;
     private HashMap<String, String> map = new HashMap<>();
+    private List<BookDetailInfo> bookList = new ArrayList<BookDetailInfo>();
     private Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -59,8 +63,8 @@ public class BorrowActivity extends AppCompatActivity implements QRCodeView.Dele
 
                 case 3:
                     //将书籍信息以对话框的形式表示出来
-                    map = (HashMap<String, String>) msg.obj;
-                    showBookDetails(map, context);
+                    bookList = (List<BookDetailInfo>) msg.obj;
+                    showBookDetails(bookList, context);
                     break;
                 case 4:
                     payQRUrl = (String) msg.obj;
@@ -81,32 +85,45 @@ public class BorrowActivity extends AppCompatActivity implements QRCodeView.Dele
 
     /**
      * 将用户借书信息显示出来
-     *
-     * @param map
+     *  @param bookList 书籍对象列表
      * @param context
      */
-    private void showBookDetails(HashMap<String, String> map, final Context context) {
-        String state = map.get("state");
-        //需要
-        String bookId = map.get("bookId");
-        String author = map.get("author");
-        String title = map.get("title");
-//        String book_id = map.get("id");
-        String price = map.get("price");
-        String deposit = map.get("deposit");
-        //需要
-        userId = map.get("userId");
+    private void showBookDetails(List<BookDetailInfo> bookList, final Context context) {
+//        String state = map.get("state");
 
-        BOOK_ID = bookId;
+//        //需要
+//        String bookId = map.get("bookId");
+//        String author = map.get("author");
+//        String title = map.get("title");
+////        String book_id = map.get("id");
+//        String price = map.get("price");
+//        String deposit = map.get("deposit");
+//        //需要
+//        userId = map.get("userId");
+//
+//        BOOK_ID = bookId;
 
-        String content = "state: " + state + "\n" +
-                "bookId: " + bookId + "\n" +
-                "author: " + author + "\n" +
-                "title: " + title + "\n" +
-//                "book_id: " + book_id + "\n" +
-                "price: " + price + "\n" +
-                "deposit: " + deposit + "\n" +
-                "userId: " + userId + "\n";
+        String content = "";
+        //逐个获取书籍对象，并得到指定的属性值
+        for (int i = 0; i < bookList.size(); i++){
+            BookDetailInfo bookDetailInfo = bookList.get(i);
+            int state = bookDetailInfo.getState();
+            String bookId = bookDetailInfo.getId();
+            String author = bookDetailInfo.getAuthor();
+            String title = bookDetailInfo.getTitle();
+            double price = bookDetailInfo.getPrice();
+            int deposit = bookDetailInfo.getDeposit();
+            String userId = bookDetailInfo.getUserId();
+            content = content + "state: " + state + "\n" +
+                    "bookId: " + bookId + "\n" +
+                    "author: " + author + "\n" +
+                    "title: " + title + "\n" +
+                    "price: " + price + "\n" +
+                    "deposit: " + deposit + "\n" +
+                    "userId: " + userId + "\n";
+        }
+
+
 
         //将书籍信息以对话框的形式表示出来
         new DroidDialog.Builder(context)

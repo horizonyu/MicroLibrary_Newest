@@ -14,11 +14,31 @@ public class BookDetailInfo {
      * int deposit = borrowInfo.getInt("deposit");
      * String refresh_token = result.getString("refresh_token");
      */
-    public String author;
-    public String title;
-    public double price;
-    public int deposit;
-    public String id;
+    private String author;
+    private String title;
+    private double price;
+    private int deposit;
+    private String id;
+    private String userId;
+    private int state;
+
+    public int getState() {
+        return state;
+    }
+
+    public void setState(int state) {
+        this.state = state;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+
 
 
     public String getAuthor() {
