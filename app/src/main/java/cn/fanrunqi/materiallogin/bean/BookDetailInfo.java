@@ -20,7 +20,34 @@ public class BookDetailInfo {
     private int deposit;
     private String id;
     private String userId;
+    private String nickName;
     private int state;
+    private String searchId;
+    private String borrowTime;
+
+    public String getBorrowTime() {
+        return borrowTime;
+    }
+
+    public void setBorrowTime(String borrowTime) {
+        this.borrowTime = borrowTime;
+    }
+
+    public String getSearchId() {
+        return searchId;
+    }
+
+    public void setSearchId(String searchId) {
+        this.searchId = searchId;
+    }
+
+    public String getNickName() {
+        return nickName;
+    }
+
+    public void setNickName(String nickName) {
+        this.nickName = nickName;
+    }
 
     public int getState() {
         return state;

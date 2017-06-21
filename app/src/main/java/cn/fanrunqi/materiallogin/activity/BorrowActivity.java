@@ -88,22 +88,10 @@ public class BorrowActivity extends AppCompatActivity implements QRCodeView.Dele
      *  @param bookList 书籍对象列表
      * @param context
      */
-    private void showBookDetails(List<BookDetailInfo> bookList, final Context context) {
-//        String state = map.get("state");
-
-//        //需要
-//        String bookId = map.get("bookId");
-//        String author = map.get("author");
-//        String title = map.get("title");
-////        String book_id = map.get("id");
-//        String price = map.get("price");
-//        String deposit = map.get("deposit");
-//        //需要
-//        userId = map.get("userId");
-//
-//        BOOK_ID = bookId;
+    private void showBookDetails(final List<BookDetailInfo> bookList, final Context context) {
 
         String content = "";
+        final String[] bookIds = new String[10];
         //逐个获取书籍对象，并得到指定的属性值
         for (int i = 0; i < bookList.size(); i++){
             BookDetailInfo bookDetailInfo = bookList.get(i);
@@ -113,7 +101,7 @@ public class BorrowActivity extends AppCompatActivity implements QRCodeView.Dele
             String title = bookDetailInfo.getTitle();
             double price = bookDetailInfo.getPrice();
             int deposit = bookDetailInfo.getDeposit();
-            String userId = bookDetailInfo.getUserId();
+            userId = bookDetailInfo.getUserId();
             content = content + "state: " + state + "\n" +
                     "bookId: " + bookId + "\n" +
                     "author: " + author + "\n" +
@@ -121,6 +109,7 @@ public class BorrowActivity extends AppCompatActivity implements QRCodeView.Dele
                     "price: " + price + "\n" +
                     "deposit: " + deposit + "\n" +
                     "userId: " + userId + "\n";
+            bookIds[i] = bookId;
         }
 
 
@@ -137,7 +126,23 @@ public class BorrowActivity extends AppCompatActivity implements QRCodeView.Dele
                     public void onPositive(Dialog dialog) {
                         //获取并显示支付二维码
                         Toast.makeText(context, "获取支付二维码", Toast.LENGTH_SHORT).show();
-                        HttpUtils.okhttp_get_payQRUrl(userId, QR_INFO, MainActivity.ACCESS_TOKEN, context, mHandler);
+                        String bIds = "\"";
+                        if (bookList.size() == 1){
+                            bIds += bookIds[0] + "\"";
+                            BOOK_ID = bIds;
+                        }else {
+                            for (int i = 0; i < bookList.size() - 1; i++){
+                                bIds += bookIds[i] + "\"" + ",";
+                            }
+                            bIds += "\"" + bookIds[bookList.size() - 1] + "\"";
+                            BOOK_ID = bIds;
+                        }
+
+                        Log.i(TAG, "bIds: " + bIds + "userId: " + userId);
+                        //TODO 获取支付二维码链接有问题
+                        HttpUtils.okhttp_get_payQRUrl(userId, bIds, MainActivity.ACCESS_TOKEN, context, mHandler);
+                        dialog.dismiss();
+
 
                     }
                 })

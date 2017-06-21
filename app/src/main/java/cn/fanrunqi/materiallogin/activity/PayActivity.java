@@ -30,8 +30,6 @@ public class PayActivity extends AppCompatActivity {
                     if (response != null){
 //                        pb.setVisibility(View.GONE);
                         iv_pay_image.setImageBitmap(response);
-
-
                     }
                     break;
                 default:

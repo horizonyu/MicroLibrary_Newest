@@ -19,7 +19,8 @@ import android.widget.Toast;
 import com.droidbyme.dialoglib.AnimUtils;
 import com.droidbyme.dialoglib.DroidDialog;
 
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import cn.bingoogolapple.photopicker.activity.BGAPhotoPickerActivity;
@@ -27,6 +28,7 @@ import cn.bingoogolapple.qrcode.core.QRCodeView;
 import cn.bingoogolapple.qrcode.zxing.QRCodeDecoder;
 import cn.fanrunqi.materiallogin.R;
 import cn.fanrunqi.materiallogin.Utils.HttpUtils;
+import cn.fanrunqi.materiallogin.bean.BookDetailInfo;
 
 public class ReturnActivity extends AppCompatActivity implements QRCodeView.Delegate{
     private static final String TAG = ReturnActivity.class.getSimpleName();
@@ -35,38 +37,45 @@ public class ReturnActivity extends AppCompatActivity implements QRCodeView.Dele
     private QRCodeView mQRCodeView;
     private Context mContext;
     private Map<String, String> map;
-
-
+    private List<BookDetailInfo> bookList = new ArrayList<BookDetailInfo>();
+    //读者id
+    private String userId = null;
+    //书籍id
+    private String bookBriefId = null;
     private Handler mHandler = new Handler(){
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
             switch (msg.what){
                 case 0:
-                    map = new HashMap<String, String>();
-                    map = (Map<String, String>) msg.obj;
-                    showBorrowBooksDetail(map);
+//                    map = new HashMap<String, String>();
+                    bookList = (List<BookDetailInfo>) msg.obj;
+                    showBorrowBooksDetail(bookList);
             }
         }
     };
 
-    private void showBorrowBooksDetail(Map<String, String> map) {
-        String bookTitle = map.get("bookTitle");
-        final String bookBriefId = map.get("bookBriefId");
-        String bookId = map.get("bookId");
-        String deposit = map.get("deposit");
-        String borrowTime = map.get("borrowTime");
-        final String userId = map.get("userId");
-        String nickName = map.get("nickName");
-
-        String content = "bookTitle: " + bookTitle + "\n" +
-                "bookBriefId: " + bookBriefId + "\n" +
-                "bookId: " + bookId + "\n" +
-                "deposit: " + deposit + "\n" +
-                "borrowTime: " + borrowTime + "\n" +
-                "userId: " + userId + "\n" +
-                "nickName: " + nickName + "\n";
-
+    private void showBorrowBooksDetail(final List<BookDetailInfo> bookList) {
+        String content = "";
+        final String[] bookIds = new String[10];
+        for (int i = 0; i < bookList.size(); i++){
+            BookDetailInfo bookDetailInfo = bookList.get(i);
+            String bookTitle = bookDetailInfo.getTitle();
+            bookBriefId = bookDetailInfo.getId();
+            String bookId = bookDetailInfo.getSearchId();
+            int deposit = bookDetailInfo.getDeposit();
+            String borrowTime = bookDetailInfo.getBorrowTime();
+            userId = bookDetailInfo.getUserId();
+            String nickName = bookDetailInfo.getNickName();
+            content = content + "bookTitle: " + bookTitle + "\n" +
+                    "bookBriefId: " + bookBriefId + "\n" +
+                    "bookId: " + bookId + "\n" +
+                    "deposit: " + deposit + "\n" +
+                    "borrowTime: " + borrowTime + "\n" +
+                    "userId: " + userId + "\n" +
+                    "nickName: " + nickName + "\n";
+            bookIds[i] = bookBriefId;
+        }
         //将书籍信息以对话框的形式表示出来
         new DroidDialog.Builder(mContext)
                 .icon(R.drawable.ic_action_tick)  //添加图标
@@ -81,14 +90,19 @@ public class ReturnActivity extends AppCompatActivity implements QRCodeView.Dele
                         Toast.makeText(mContext, "positive", Toast.LENGTH_SHORT).show();
 
                         //在确认无误后，还给用户押金，并修改用户信息以及书籍信息
-                        HttpUtils.okhttp_put_return_info(mContext, bookBriefId, MainActivity.ACCESS_TOKEN, userId);
-
+                        String bIds = "\"";
+                        if (bookList.size() == 1){
+                            bIds += bookIds[0] + "\"";
+                        }else {
+                            for (int i = 0; i < bookList.size() - 1; i++){
+                                bIds += bookIds[i] + "\"" + ",";
+                            }
+                            bIds += "\"" + bookIds[bookList.size() -1] + "\"";
+                        }
+                           Log.i(TAG, "bIds: " + bIds);
+                        HttpUtils.okhttp_put_return_info(mContext, bIds, MainActivity.ACCESS_TOKEN, userId);
                         dialog.dismiss();
-
                         ReturnActivity.this.finish();
-
-
-
                     }
                 })
                 .negativeButton("Cancel", new DroidDialog.onNegativeListener() {
