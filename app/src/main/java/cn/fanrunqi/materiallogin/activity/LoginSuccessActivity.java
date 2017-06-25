@@ -38,6 +38,7 @@ public class LoginSuccessActivity extends AppCompatActivity {
     /**
      * 初始化控件
      */
+
     private void initView() {
         bt_borrow = (Button) findViewById(R.id.bt_borrow);
         bt_return = (Button) findViewById(R.id.bt_return);
