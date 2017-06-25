@@ -12,6 +12,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
+import android.transition.Explode;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -40,8 +41,10 @@ public class MainActivity extends AppCompatActivity {
     private static String token_type;
     private static Map<String, String> map = new HashMap<>();
     private Context mContext;
-    private ActivityOptionsCompat oc2 = ActivityOptionsCompat.makeSceneTransitionAnimation(this);
+
+
     private Handler mHandler = new Handler() {
+        @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
@@ -57,6 +60,7 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void handle_response_login(Map<String, String> map, Context mContext) {
         if (map.size() > 0) {
             //实现跳转
@@ -64,9 +68,18 @@ public class MainActivity extends AppCompatActivity {
             String access_token = map.get("access_token");
             ACCESS_TOKEN = access_token;
 
+            Explode explode = new Explode();
+            explode.setDuration(500);
+
+            getWindow().setExitTransition(explode);
+            getWindow().setEnterTransition(explode);
+            ActivityOptionsCompat oc2 = ActivityOptionsCompat.makeSceneTransitionAnimation(this);
             Intent i2 = new Intent(mContext.getApplicationContext(), LoginSuccessActivity.class);
             startActivity(i2, oc2.toBundle());
+//            startActivity(i2);
+
             finish();
+
 
             Toast.makeText(getApplicationContext(), access_token + "!", Toast.LENGTH_SHORT).show();
         } else {
@@ -118,7 +131,6 @@ public class MainActivity extends AppCompatActivity {
                 break;
         }
     }
-
     /**
      * @param response 解析Json数据，并将指定的数据返回
      * @return

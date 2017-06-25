@@ -33,6 +33,7 @@ import cn.fanrunqi.materiallogin.bean.BookDetailInfo;
 public class ReturnActivity extends AppCompatActivity implements QRCodeView.Delegate{
     private static final String TAG = ReturnActivity.class.getSimpleName();
     private static final int REQUEST_CODE_CHOOSE_QRCODE_FROM_GALLERY_RETURN = 667;
+    private static final int REQUEST_CODE_CHOOSE_QRCODE_FROM_GALLERY = 666;
 
     private QRCodeView mQRCodeView;
     private Context mContext;
@@ -135,7 +136,7 @@ public class ReturnActivity extends AppCompatActivity implements QRCodeView.Dele
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_borrow);
+        setContentView(R.layout.activity_return);
 //        setSupportActionBar((Toolbar)findViewById(R.id.toolbar));
 
         mQRCodeView = (QRCodeView) findViewById(R.id.zxingview);
@@ -193,7 +194,7 @@ public class ReturnActivity extends AppCompatActivity implements QRCodeView.Dele
         mQRCodeView.onDestroy();
     }
 
-    public void onClick(View view){
+    public void OnClick(View view){
         switch (view.getId()){
             case R.id.open_flashlight:
                 mQRCodeView.openFlashlight();
@@ -202,7 +203,7 @@ public class ReturnActivity extends AppCompatActivity implements QRCodeView.Dele
                 mQRCodeView.closeFlashlight();
                 break;
             case R.id.choose_qrcde_from_gallery:
-                startActivityForResult(BGAPhotoPickerActivity.newIntent(this, null, 1, null, false), REQUEST_CODE_CHOOSE_QRCODE_FROM_GALLERY_RETURN);
+                startActivityForResult(BGAPhotoPickerActivity.newIntent(this, null, 1, null, false), REQUEST_CODE_CHOOSE_QRCODE_FROM_GALLERY);
                 break;
             default:
                 break;
@@ -214,7 +215,7 @@ public class ReturnActivity extends AppCompatActivity implements QRCodeView.Dele
         super.onActivityResult(requestCode, resultCode, data);
         mQRCodeView.showScanRect();
 
-        if (resultCode == Activity.RESULT_OK && requestCode == REQUEST_CODE_CHOOSE_QRCODE_FROM_GALLERY_RETURN) {
+        if (resultCode == Activity.RESULT_OK && requestCode == REQUEST_CODE_CHOOSE_QRCODE_FROM_GALLERY) {
             final String imagePath = BGAPhotoPickerActivity.getSelectedImages(data).get(0);
 
             AsyncTask<Void, Void, String> asyncTask = new AsyncTask<Void, Void, String>() {
@@ -233,6 +234,12 @@ public class ReturnActivity extends AppCompatActivity implements QRCodeView.Dele
                     } else {
                         //识别二维码的信息
                         Toast.makeText(mContext, "图片二维码信息是：" + result, Toast.LENGTH_SHORT).show();
+                        //还书入口
+                        Log.i("ReturnBookInfo", "onScanQRCodeSuccess: " + result);
+                        vibrate();
+
+                        HttpUtils.okhttp_get_borrow_info(mContext, result, MainActivity.ACCESS_TOKEN, mHandler);
+
 
                     }
                 }

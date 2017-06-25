@@ -1,14 +1,18 @@
 package cn.fanrunqi.materiallogin.activity;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Vibrator;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
@@ -36,6 +40,7 @@ public class BorrowActivity extends AppCompatActivity implements QRCodeView.Dele
     private static final String TAG = BorrowActivity.class.getSimpleName();
     private static final int REQUEST_CODE_CHOOSE_QRCODE_FROM_GALLERY = 666;
     private static final int CHOOSE_PHOTO = 3;
+    private static final int MY_PERMISSIONS_REQUEST_CALL_PHONE2 = 7;
 
     public static String QR_INFO = "";
     public static String BOOK_ID = "";
@@ -111,9 +116,6 @@ public class BorrowActivity extends AppCompatActivity implements QRCodeView.Dele
                     "userId: " + userId + "\n";
             bookIds[i] = bookId;
         }
-
-
-
         //将书籍信息以对话框的形式表示出来
         new DroidDialog.Builder(context)
                 .icon(R.drawable.ic_action_tick)  //添加图标
@@ -142,8 +144,6 @@ public class BorrowActivity extends AppCompatActivity implements QRCodeView.Dele
                         //TODO 获取支付二维码链接有问题
                         HttpUtils.okhttp_get_payQRUrl(userId, bIds, MainActivity.ACCESS_TOKEN, context, mHandler);
                         dialog.dismiss();
-
-
                     }
                 })
                 .negativeButton("Cancel", new DroidDialog.onNegativeListener() {
@@ -301,11 +301,19 @@ public class BorrowActivity extends AppCompatActivity implements QRCodeView.Dele
                 mQRCodeView.closeFlashlight();
                 break;
             case R.id.choose_qrcde_from_gallery:
-//                Intent intent = new Intent("android.intent.action.GET_CONTENT");
-//                intent.setType("image/*");
-//                startActivityForResult(intent, CHOOSE_PHOTO);
 
-                startActivityForResult(BGAPhotoPickerActivity.newIntent(this, null, 1, null, false), REQUEST_CODE_CHOOSE_QRCODE_FROM_GALLERY);
+                if (ContextCompat.checkSelfPermission(this,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                        != PackageManager.PERMISSION_GRANTED)
+                {
+                    ActivityCompat.requestPermissions(this,
+                            new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                            MY_PERMISSIONS_REQUEST_CALL_PHONE2);
+
+                }else {
+                    choosePic();
+                }
+
                 Log.i(TAG, "OnClick: startActivityForResult");
                 break;
             default:
@@ -313,5 +321,27 @@ public class BorrowActivity extends AppCompatActivity implements QRCodeView.Dele
         }
     }
 
+    /**
+     * 从本地相册获取二维码
+     */
+    private void choosePic() {
+        startActivityForResult(BGAPhotoPickerActivity.newIntent(this, null, 1, null, false), REQUEST_CODE_CHOOSE_QRCODE_FROM_GALLERY);
 
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == MY_PERMISSIONS_REQUEST_CALL_PHONE2)
+        {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED)
+            {
+                choosePic();
+            } else
+            {
+                // Permission Denied
+                Toast.makeText(BorrowActivity.this, "Permission Denied", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
 }

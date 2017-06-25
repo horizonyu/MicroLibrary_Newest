@@ -11,6 +11,7 @@
         android:id="@+id/iv_pay_image"
         android:layout_width="wrap_content"
         android:layout_height="261dp"
+        android:layout_gravity="center"
         android:src="@drawable/bg" />
 
     <Button

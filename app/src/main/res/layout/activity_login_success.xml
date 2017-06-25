@@ -1,15 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:paddingBottom="@dimen/activity_vertical_margin"
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
+    android:orientation="vertical"
     android:gravity="center"
     tools:context="cn.fanrunqi.materiallogin.activity.LoginSuccessActivity"
-    android:background="@drawable/bg">
+    android:background="@drawable/bg"
+    android:weightSum="1">
 
 
 
@@ -18,13 +21,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:onClick="btOnClick"
+
         android:text="Borrow"/>
 
     <Button
         android:id="@+id/bt_return"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/bt_borrow"
         android:onClick="btOnClick"
         android:text="Return"/>
 
@@ -32,7 +35,61 @@
         android:id="@+id/bt_exit"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/bt_return"
         android:onClick="btOnClick"
         android:text="EXIT"/>
-</RelativeLayout>
+
+    <com.unstoppable.submitbuttonview.SubmitButton
+        android:id="@+id/sbt_borrow"
+        android:layout_width="147dp"
+        android:layout_height="wrap_content"
+        android:visibility="visible"
+        android:onClick="btOnClick"
+        app:buttonText="Borrow"
+         />
+    <com.unstoppable.submitbuttonview.SubmitButton
+        android:id="@+id/sbt_return"
+        android:layout_width="147dp"
+        android:layout_height="wrap_content"
+        android:visibility="visible"
+        android:onClick="btOnClick"
+        app:buttonText="Return"
+        />
+    <com.unstoppable.submitbuttonview.SubmitButton
+        android:id="@+id/sbt_exit"
+        android:layout_width="147dp"
+        android:layout_height="wrap_content"
+        android:visibility="visible"
+        android:onClick="btOnClick"
+        app:buttonText="Exit"
+        />
+
+    <com.imangazaliev.circlemenu.CircleMenu
+        android:id="@+id/circleMenu"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        >
+        <com.imangazaliev.circlemenu.CircleMenuButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/exit"
+            app:colorNormal="#2196F3"
+            app:colorPressed="#1E88E5"
+            app:icon="@drawable/ic_favorite"/>
+
+        <com.imangazaliev.circlemenu.CircleMenuButton
+            android:id="@+id/borrow_book"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:colorNormal="#4CAF50"
+            app:colorPressed="#43A047"
+            app:icon="@drawable/ic_search"/>
+
+        <com.imangazaliev.circlemenu.CircleMenuButton
+            android:id="@+id/return_book"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:colorNormal="#F44336"
+            app:colorPressed="#E53935"
+            app:icon="@drawable/ic_alert"/>
+    </com.imangazaliev.circlemenu.CircleMenu>
+</LinearLayout>

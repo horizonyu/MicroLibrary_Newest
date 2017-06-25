@@ -22,13 +22,6 @@ android {
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
 
-
-
-
-
-
-
-
     compile 'cn.bingoogolapple:bga-qrcodecore:1.1.7@aar'
     compile 'cn.bingoogolapple:bga-qrcodecore:1.1.7@aar'
     compile 'com.android.support:appcompat-v7:25.3.1'
@@ -45,4 +38,8 @@ dependencies {
     compile 'com.github.droidbyme:DroidDialog:d4b5af0f48'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
     testCompile 'junit:junit:4.12'
+
+    compile 'com.unstoppable:submitbutton:1.1.1'
+
+    compile 'com.github.imangazalievm:circlemenu:1.0.3'
 }
